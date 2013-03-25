@@ -314,27 +314,31 @@ function validateZIPCode($zipcode) {
 }
 
 function writeLogFile() {
-	global $strLogID, $strLogDate, $strLogTesting, $strLogError, $station_list, $arrLogFlagship, $userIP, $zipcode, $ipToFilter, $pathToLogfile;
+	global $strLogID, $strLogDate, $strLogTesting, $strLogError, $station_list, $arrLogFlagship, $userIP, $zipcode, $ipToFilter, $pathToLogFile;
 //	echo "in the log file Date is $strLogDate, testing is $strLogTesting and error is $strLogError, zipcode is $zipcode and userip is $userIP";
 //	echo '<br/><br/>';
 	$stationCount = 0;
 	// write the log file
-	if ($strLogError == 'NONE' && $userIP != $ipToFilter) {
-		foreach ($station_list as $station) {					
-			for ($i=0; $i < count($station['callsigns']); $i++) {
-				$strLogFile = $strLogID.'-'.$stationCount.'-'.$i.','.$strLogDate.','.$userIP.','.$zipcode.','.$strLogTesting.','.$strLogError.',';
-				$strLogFile .= $station['flagship'].','.$station['rank'].','.$station['confidence'].',';
-				$strLogFile .= $station['callsigns'][$i]."\n";
-//				echo $strLogFile.'<br/>';
-				error_log($strLogFile, 3, $pathToLogfile);
+	if ($userIP != $ipToFilter) {
+		if ($strLogError == 'NONE' && $userIP != $ipToFilter) {
+			foreach ($station_list as $station) {					
+				for ($i=0; $i < count($station['callsigns']); $i++) {
+					$strLogFile = $strLogID.'-'.$stationCount.'-'.$i.','.$strLogDate.','.$userIP.','.$zipcode.','.$strLogTesting.','.$strLogError.',';
+					$strLogFile .= $station['flagship'].','.$station['rank'].','.$station['confidence'].',';
+					$strLogFile .= $station['callsigns'][$i]."\n";
+	//				echo $strLogFile.'<br/>';
+					error_log($strLogFile, 3, $pathToLogFile);
+				}
+				$stationCount++;
 			}
-			$stationCount++;
+			unset($station);
+		} else {
+			$strLogFile = $strLogID.','.$strLogDate.','.$userIP.','.$zipcode.','.$strLogTesting.','.$strLogError.',,,,'."\n";
+	//		echo $strLogFile.'<br/>';
+			error_log($strLogFile, 3, $pathToLogFile);
 		}
-		unset($station);
 	} else {
-		$strLogFile = $strLogID.','.$strLogDate.','.$userIP.','.$zipcode.','.$strLogTesting.','.$strLogError.',,,,'."\n";
-//		echo $strLogFile.'<br/>';
-		error_log($strLogFile, 3, $pathToLogfile);
+		echo 'no log entry was written since we are filtering your IP address<br/>';
 	}
 	return;
 }
